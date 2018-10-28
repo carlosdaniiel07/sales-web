@@ -1,0 +1,28 @@
+﻿@model SalesWeb.Models.Vendedor
+
+@{
+    ViewData["Title"] = "Remover vendedor";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>@Html.DisplayNameFor(model => model.Nome)</dt>
+        <dd>@Html.DisplayFor(model => model.Nome)</dd>
+        <dt>@Html.DisplayNameFor(model => model.Email)</dt>
+        <dd>@Html.DisplayFor(model => model.Email)</dd>
+        <dt>@Html.DisplayNameFor(model => model.Nascimento)</dt>
+        <dd>@Model.Nascimento.ToShortDateString()</dd>
+        <dt>@Html.DisplayNameFor(model => model.Salario)</dt>
+        <dd>@Html.DisplayFor(model => model.Salario)</dd>
+        <dt>@Html.DisplayNameFor(model => model.Departamento)</dt>
+        <dd>@Html.DisplayFor(model => model.Departamento.Nome)</dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-primary">Confirmar&nbsp; <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+    </form>
+</div>

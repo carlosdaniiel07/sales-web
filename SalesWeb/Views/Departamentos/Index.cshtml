@@ -8,12 +8,12 @@
 
 <p>
     <div class="form-group">
-        <a asp-action="Create"><input type="button" value="Novo" class="btn btn-primary" /></a>
+        <a asp-action="Create"><input type="button" value="Novo" class="btn btn-primary btn-sm" /></a>
     </div>
 </p>
 <table class="table table-hover">
     <thead>
-        <tr>
+        <tr class="bg-primary">
             <th>@Html.DisplayNameFor(model => model.Id)</th>
             <th>@Html.DisplayNameFor(model => model.Nome)</th>
             <th></th>
@@ -27,7 +27,7 @@
                 <td>@Html.DisplayFor(modelItem => item.Nome)</td>
                 <td>
                     <div class="btn-group">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Opções</a>
+                        <a href="#" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Opções&nbsp; <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span></a>
                         <ul class="dropdown-menu">
                             <li><a asp-action="Details" asp-route-id="@item.Id">Detalhes</a></li>
                             <li><a asp-action="Edit" asp-route-id="@item.Id">Editar</a></li>

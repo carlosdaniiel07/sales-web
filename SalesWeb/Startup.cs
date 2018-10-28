@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 using SalesWeb.Models;
 using SalesWeb.Data;
+using SalesWeb.Services;
 
 namespace SalesWeb
 {
@@ -41,6 +42,9 @@ namespace SalesWeb
             services.AddDbContext<SalesWebContext>(options =>
                     options.UseMySql(Configuration.GetConnectionString("SalesWebContext"), 
                     builder => builder.MigrationsAssembly("SalesWeb")));
+
+            services.AddScoped<VendedorService>();
+            services.AddScoped<DepartamentoService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,7 +68,7 @@ namespace SalesWeb
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Departamentos}/{action=Index}/{id?}");
             });
         }
     }
