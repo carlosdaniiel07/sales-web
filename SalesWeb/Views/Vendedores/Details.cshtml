@@ -15,9 +15,11 @@
         <dt>@Html.DisplayNameFor(model => model.Email)</dt>
         <dd>@Html.DisplayFor(model => model.Email)</dd>
         <dt>@Html.DisplayNameFor(model => model.Nascimento)</dt>
-        <dd>@Html.DisplayFor(model => model.Nascimento)</dd>
+        <dd>@Model.Nascimento.ToShortDateString()</dd>
         <dt>@Html.DisplayNameFor(model => model.Salario)</dt>
         <dd>@Html.DisplayFor(model => model.Salario)</dd>
+        <dt>@Html.DisplayNameFor(model => model.Departamento)</dt>
+        <dd>@Html.DisplayFor(model => model.Departamento.Nome)</dd>
     </dl>
 </div>
 <div>

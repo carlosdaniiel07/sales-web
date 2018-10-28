@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 using SalesWeb.Data;
 using SalesWeb.Models;
+using SalesWeb.Services.Exceptions;
 
 namespace SalesWeb.Services
 {
@@ -24,6 +26,60 @@ namespace SalesWeb.Services
         public ICollection<Departamento> Consulta ()
         {
             return _context.Departamento.OrderBy(x => x.Nome).ToList();
+        }
+
+        /// <summary>
+        /// Obtem um departamento através do seu Id
+        /// </summary>
+        /// <param name="id">O departamento a ser procurado</param>
+        /// <returns></returns>
+        public Departamento Consulta (int id)
+        {
+            return _context.Departamento.Find(id);
+        }
+
+        /// <summary>
+        /// Insere um novo departamento no BD
+        /// </summary>
+        /// <param name="departamento">O departamento a ser inserido</param>
+        /// <returns></returns>
+        public int Insere (Departamento departamento)
+        {
+            _context.Departamento.Add(departamento);
+            return _context.SaveChanges();
+        }
+
+        /// <summary>
+        /// Atualiza os dados de um departmaento
+        /// </summary>
+        /// <param name="departamento">O departamento a ser atualizado</param>
+        /// <returns></returns>
+        public int Atualiza (Departamento departamento)
+        {
+            if (_context.Departamento.Any(x => x.Id.Equals(departamento.Id)))
+            {
+                try
+                {
+                    _context.Departamento.Update(departamento);
+                    return _context.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException e) { throw new DbConcurrencyException(e.Message); }
+            }
+            else
+                throw new NotFoundException("Departamento não encontrado!");
+        }
+
+        /// <summary>
+        /// Remove um departamento do BD
+        /// </summary>
+        /// <param name="id">O Id do departamento a ser removido</param>
+        /// <returns></returns>
+        public int Remove (int id)
+        {
+            var departamento = Consulta(id);
+            _context.Departamento.Remove(departamento);
+
+            return _context.SaveChanges();
         }
     }
 }

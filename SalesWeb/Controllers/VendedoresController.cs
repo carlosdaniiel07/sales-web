@@ -60,7 +60,7 @@ namespace SalesWeb.Controllers
         /// <summary>
         /// 
         /// </summary>
-        /// <returns>Vendedores/Create</returns>
+        /// <returns>Vendedores/Edit</returns>
         public IActionResult Edit (int? id)
         {
             if(id != null)
@@ -104,6 +104,26 @@ namespace SalesWeb.Controllers
             }
             else
                 return BadRequest();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>Vendedores/Details</returns>
+        public IActionResult Details (int? id)
+        {
+            if (id != null)
+            {
+                // Obtem o vendedor através do seu Id
+                var vendedor = _vendedorService.Consulta(id.Value);
+
+                if (vendedor != null)
+                    return View(vendedor);
+                else
+                    return NotFound();
+            }
+            else
+                return NotFound();
         }
 
         /// <summary>

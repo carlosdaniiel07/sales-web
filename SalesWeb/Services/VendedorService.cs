@@ -25,7 +25,7 @@ namespace SalesWeb.Services
         /// <returns></returns>
         public ICollection<Vendedor> Consulta ()
         {
-            return _context.Vendedor.ToList();
+            return _context.Vendedor.Include(x => x.Departamento).ToList();
         }
 
         /// <summary>

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 using SalesWeb.Models;
+using SalesWeb.Services;
+using SalesWeb.Services.Exceptions;
 using SalesWeb.Data;
 
 
@@ -14,142 +16,137 @@ namespace SalesWeb.Controllers
 {
     public class DepartamentosController : Controller
     {
-        private readonly SalesWebContext _context;
+        private readonly DepartamentoService _departamentoService;
 
-        public DepartamentosController(SalesWebContext context)
+        public DepartamentosController(DepartamentoService departamentoService)
         {
-            _context = context;
+            _departamentoService = departamentoService;
         }
 
-        // GET: Departamentos
-        public async Task<IActionResult> Index()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>Departamentos/Index</returns>
+        public IActionResult Index ()
         {
-            return View(await _context.Departamento.ToListAsync());
+            return View(_departamentoService.Consulta());
         }
 
-        // GET: Departamentos/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var departamento = await _context.Departamento
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (departamento == null)
-            {
-                return NotFound();
-            }
-
-            return View(departamento);
-        }
-
-        // GET: Departamentos/Create
-        public IActionResult Create()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>Departamentos/Create</returns>
+        public IActionResult Create ()
         {
             return View();
         }
 
-        // POST: Departamentos/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        /// <summary>
+        /// Insere um departamento no BD
+        /// </summary>
+        /// <param name="departamento">O departamento a ser inserido</param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome")] Departamento departamento)
+        public IActionResult Create (Departamento departamento)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(departamento);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(departamento);
-        }
-
-        // GET: Departamentos/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var departamento = await _context.Departamento.FindAsync(id);
-            if (departamento == null)
-            {
-                return NotFound();
-            }
-            return View(departamento);
-        }
-
-        // POST: Departamentos/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome")] Departamento departamento)
-        {
-            if (id != departamento.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(departamento);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!DepartamentoExists(departamento.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(departamento);
-        }
-
-        // GET: Departamentos/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var departamento = await _context.Departamento
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (departamento == null)
-            {
-                return NotFound();
-            }
-
-            return View(departamento);
-        }
-
-        // POST: Departamentos/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var departamento = await _context.Departamento.FindAsync(id);
-            _context.Departamento.Remove(departamento);
-            await _context.SaveChangesAsync();
+            _departamentoService.Insere(departamento);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool DepartamentoExists(int id)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Departamentos/Edit</returns>
+        public IActionResult Edit (int? id)
         {
-            return _context.Departamento.Any(e => e.Id == id);
+            if (id != null)
+            {
+                // Obtem o departamento
+                var departamento = _departamentoService.Consulta(id.Value);
+
+                if (departamento != null)
+                    return View(departamento);
+                else
+                    return NotFound();
+            }
+            else
+                return NotFound();
+        }
+
+        /// <summary>
+        /// Atualiza os dados de um departamento
+        /// </summary>
+        /// <param name="id">O Id do departamento</param>
+        /// <param name="departamento">Os novos dados do departamento</param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit (int id, Departamento departamento)
+        {
+            if (id.Equals(departamento.Id))
+            {
+                try
+                {
+                    _departamentoService.Atualiza(departamento);
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbConcurrencyException) { return BadRequest(); }
+                catch (NotFoundException) { return NotFound(); }
+            }
+            else
+                return BadRequest();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Departamentos/Details</returns>
+        public IActionResult Details (int? id)
+        {
+            if (id != null)
+            {
+                // Obtem o departamento
+                var departamento = _departamentoService.Consulta(id.Value);
+
+                if (departamento != null)
+                    return View(departamento);
+                else
+                    return NotFound();
+            }
+            else
+                return NotFound();
+        }
+
+        public IActionResult Delete (int? id)
+        {
+            if (id != null)
+            {
+                // Obtem o departamento
+                var departamento = _departamentoService.Consulta(id.Value);
+
+                if (departamento != null)
+                    return View(departamento);
+                else
+                    return NotFound();
+            }
+            else
+                return NotFound();
+        }
+
+        /// <summary>
+        /// Remove um departamento do BD
+        /// </summary>
+        /// <param name="id">O Id do departamento a ser removido</param>
+        /// <returns></returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete (int id)
+        {
+            _departamentoService.Remove(id);
+            return RedirectToAction(nameof(Index));
         }
     }
 }
