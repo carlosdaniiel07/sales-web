@@ -1,13 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-using SalesWeb.Data;
 using SalesWeb.Models;
 using SalesWeb.Models.ViewModel;
 using SalesWeb.Services;
-using SalesWeb.Services.Exceptions;
 
 namespace SalesWeb.Controllers
 {
@@ -26,19 +24,19 @@ namespace SalesWeb.Controllers
         /// 
         /// </summary>
         /// <returns>Vendedores/Index</returns>
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(_vendedorService.Consulta());
+            return View(await _vendedorService.ConsultaAsync());
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns>Vendedores/Create</returns>
-        public IActionResult Create ()
+        public async Task<IActionResult> Create ()
         {
             // Obtem uma lista de departamentos
-            var departamentos = _departamentoService.Consulta();
+            var departamentos = await _departamentoService.ConsultaAsync();
             var viewModel = new VendedorFormViewModel { Departamentos = departamentos };
 
             return View(viewModel);
@@ -51,34 +49,39 @@ namespace SalesWeb.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create (Vendedor vendedor)
+        public async Task<IActionResult> Create (Vendedor vendedor)
         {
-            _vendedorService.Insere(vendedor);
-            return RedirectToAction(nameof(Index));
+            if (ModelState.IsValid)
+            {
+                _vendedorService.Insere(vendedor);
+                return RedirectToAction(nameof(Index));
+            }
+            else
+                return View(new VendedorFormViewModel { Departamentos = await _departamentoService.ConsultaAsync(), Vendedor = vendedor });
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns>Vendedores/Edit</returns>
-        public IActionResult Edit (int? id)
+        public async Task<IActionResult> Edit (int? id)
         {
             if(id != null)
             {
                 // Obtem o vendedor através do seu Id
                 var viewModel = new VendedorFormViewModel
                 {
-                    Vendedor = _vendedorService.Consulta(id.Value),
-                    Departamentos = _departamentoService.Consulta()
+                    Vendedor = await _vendedorService.ConsultaAsync(id.Value),
+                    Departamentos = await _departamentoService.ConsultaAsync()
                 };
 
                 if (viewModel.Vendedor != null)
                     return View(viewModel);
                 else
-                    return NotFound();
+                    return RedirectToAction(nameof(Error), new { message = "Vendedor não localizado" });
             }
             else
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Vendedor deve ser informado" });
         }
 
         /// <summary>
@@ -89,41 +92,45 @@ namespace SalesWeb.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit (int id, Vendedor vendedor)
+        public async Task<IActionResult> Edit (int id, Vendedor vendedor)
         {
-            if (id.Equals(vendedor.Id))
+            if(ModelState.IsValid)
             {
-                try
+                if (id.Equals(vendedor.Id))
                 {
-                    _vendedorService.Atualiza(vendedor);
-                    return RedirectToAction(nameof(Index));
+                    try
+                    {
+                        _vendedorService.Atualiza(vendedor);
+                        return RedirectToAction(nameof(Index));
 
+                    }
+                    catch (ApplicationException e) { return RedirectToAction(nameof(Error), new { message = e.Message }); }
                 }
-                catch (DbConcurrencyException) { return BadRequest(); }
-                catch (NotFoundException) { return NotFound(); }
+                else
+                    return RedirectToAction(nameof(Error), new { message = "Falha ao processar a sua requisição" });
             }
             else
-                return BadRequest();
+                return View(new VendedorFormViewModel { Departamentos = await _departamentoService.ConsultaAsync(), Vendedor = vendedor });
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns>Vendedores/Details</returns>
-        public IActionResult Details (int? id)
+        public async Task<IActionResult> Details (int? id)
         {
             if (id != null)
             {
                 // Obtem o vendedor através do seu Id
-                var vendedor = _vendedorService.Consulta(id.Value);
+                var vendedor = await _vendedorService.ConsultaAsync(id.Value);
 
                 if (vendedor != null)
                     return View(vendedor);
                 else
-                    return NotFound();
+                    return RedirectToAction(nameof(Error), new { message = "Vendedor não localizado" });
             }
             else
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Vendedor deve ser informado" });
         }
 
         /// <summary>
@@ -131,20 +138,20 @@ namespace SalesWeb.Controllers
         /// </summary>
         /// <param name="id">O Id do vendedor a ser removido</param>
         /// <returns>Vendedores/Delete</returns>
-        public IActionResult Delete (int? id)
+        public async Task<IActionResult> Delete (int? id)
         {
             if (id != null)
             {
                 // Obtem o vendedor através do seu Id
-                var vendedor = _vendedorService.Consulta(id.Value);
+                var vendedor = await _vendedorService.ConsultaAsync(id.Value);
 
                 if (vendedor != null)
                     return View(vendedor);
                 else
-                    return NotFound();
+                    return RedirectToAction(nameof(Error), new { message = "Vendedor não localizado" });
             }
             else
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Vendedor deve ser informado" });
         }
 
         /// <summary>
@@ -158,6 +165,22 @@ namespace SalesWeb.Controllers
         {
             _vendedorService.Remove(id);
             return RedirectToAction(nameof(Index));
+        }
+
+        /// <summary>
+        /// Retorna uma página de erro ao usuário
+        /// </summary>
+        /// <param name="message">A mensagem de erro a ser exibida</param>
+        /// <returns></returns>
+        public IActionResult Error (string message)
+        {
+            var errorViewModel = new ErrorViewModel
+            {
+                Message = message,
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            };
+
+            return View(errorViewModel);
         }
     }
 }

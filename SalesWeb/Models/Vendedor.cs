@@ -1,15 +1,29 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace SalesWeb.Models
 {
     public class Vendedor
     {
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "O campo {0} é obrigatório")]
+        [StringLength(60, MinimumLength = 3, ErrorMessage = "O valor informado precisa estar entre {2} à {1} caracteres")]
         public string Nome { get; set; }
+
+        [StringLength(80, MinimumLength = 3, ErrorMessage = "O valor informado precisa estar entre {2} à {1} caracteres")]
         public string Email { get; set; }
+
+        [Required(ErrorMessage = "O campo {0} é obrigatório")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}")]
         public DateTime Nascimento { get; set; }
+
+        [Required(ErrorMessage = "O campo {0} é obrigatório")]
+        [DataType(DataType.Currency)]
+        [DisplayFormat(DataFormatString = "{0:F2}")]
         public double Salario { get; set; }
 
         public Departamento Departamento { get; set; }

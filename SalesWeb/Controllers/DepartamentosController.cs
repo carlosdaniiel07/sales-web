@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 using SalesWeb.Models;
+using SalesWeb.Models.ViewModel;
 using SalesWeb.Services;
-using SalesWeb.Services.Exceptions;
-using SalesWeb.Data;
-
 
 namespace SalesWeb.Controllers
 {
@@ -27,9 +22,9 @@ namespace SalesWeb.Controllers
         /// 
         /// </summary>
         /// <returns>Departamentos/Index</returns>
-        public IActionResult Index ()
+        public async Task<IActionResult> Index ()
         {
-            return View(_departamentoService.Consulta());
+            return View(await _departamentoService.ConsultaAsync());
         }
 
         /// <summary>
@@ -50,8 +45,13 @@ namespace SalesWeb.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create (Departamento departamento)
         {
-            _departamentoService.Insere(departamento);
-            return RedirectToAction(nameof(Index));
+            if (ModelState.IsValid)
+            {
+                _departamentoService.Insere(departamento);
+                return RedirectToAction(nameof(Index));
+            }
+            else
+                return View(departamento);
         }
 
         /// <summary>
@@ -59,20 +59,20 @@ namespace SalesWeb.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Departamentos/Edit</returns>
-        public IActionResult Edit (int? id)
+        public async Task<IActionResult> Edit (int? id)
         {
             if (id != null)
             {
                 // Obtem o departamento
-                var departamento = _departamentoService.Consulta(id.Value);
+                var departamento = await _departamentoService.ConsultaAsync(id.Value);
 
                 if (departamento != null)
                     return View(departamento);
                 else
-                    return NotFound();
+                    return RedirectToAction(nameof(Error), new { message = "Departamento não encontrado" });
             }
             else
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Departamento deve ser informado" });
         }
 
         /// <summary>
@@ -85,18 +85,22 @@ namespace SalesWeb.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit (int id, Departamento departamento)
         {
-            if (id.Equals(departamento.Id))
+            if (ModelState.IsValid)
             {
-                try
+                if (id.Equals(departamento.Id))
                 {
-                    _departamentoService.Atualiza(departamento);
-                    return RedirectToAction(nameof(Index));
+                    try
+                    {
+                        _departamentoService.Atualiza(departamento);
+                        return RedirectToAction(nameof(Index));
+                    }
+                    catch (ApplicationException e) { return RedirectToAction(nameof(Error), new { message = e.Message }); }
                 }
-                catch (DbConcurrencyException) { return BadRequest(); }
-                catch (NotFoundException) { return NotFound(); }
+                else
+                    return RedirectToAction(nameof(Error), new { message = "Falha ao processar a sua requisição" });
             }
             else
-                return BadRequest();
+                return View(departamento);
         }
 
         /// <summary>
@@ -104,36 +108,36 @@ namespace SalesWeb.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Departamentos/Details</returns>
-        public IActionResult Details (int? id)
+        public async Task<IActionResult> Details (int? id)
         {
             if (id != null)
             {
                 // Obtem o departamento
-                var departamento = _departamentoService.Consulta(id.Value);
+                var departamento = await _departamentoService.ConsultaAsync(id.Value);
 
                 if (departamento != null)
                     return View(departamento);
                 else
-                    return NotFound();
+                    return RedirectToAction(nameof(Error), new { message = "Departamento não encontrado" });
             }
             else
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Departamento deve ser informado" });
         }
 
-        public IActionResult Delete (int? id)
+        public async Task<IActionResult> Delete (int? id)
         {
             if (id != null)
             {
                 // Obtem o departamento
-                var departamento = _departamentoService.Consulta(id.Value);
+                var departamento = await _departamentoService.ConsultaAsync(id.Value);
 
                 if (departamento != null)
                     return View(departamento);
                 else
-                    return NotFound();
+                    return RedirectToAction(nameof(Error), new { message = "Departamento não encontrado" });
             }
             else
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Departamento deve ser informado" });
         }
 
         /// <summary>
@@ -147,6 +151,22 @@ namespace SalesWeb.Controllers
         {
             _departamentoService.Remove(id);
             return RedirectToAction(nameof(Index));
+        }
+
+        /// <summary>
+        /// Exibe uma página de erro au usuário
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public IActionResult Error (string message)
+        {
+            var errorViewModel = new ErrorViewModel
+            {
+                Message = message,
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            };
+
+            return View(errorViewModel);
         }
     }
 }

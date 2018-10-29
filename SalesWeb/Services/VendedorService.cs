@@ -23,18 +23,18 @@ namespace SalesWeb.Services
         /// Obtem todos os vendedores armazenados no BD
         /// </summary>
         /// <returns></returns>
-        public ICollection<Vendedor> Consulta ()
+        public async Task<ICollection<Vendedor>> ConsultaAsync ()
         {
-            return _context.Vendedor.Include(x => x.Departamento).ToList();
+            return await _context.Vendedor.Include(x => x.Departamento).ToListAsync();
         }
 
         /// <summary>
         /// Obtem um vendedor através do seu Id
         /// </summary>
         /// <returns></returns>
-        public Vendedor Consulta(int id)
+        public async Task<Vendedor> ConsultaAsync (int id)
         {
-            return _context.Vendedor.Include(x => x.Departamento).FirstOrDefault(x => x.Id.Equals(id));
+            return await _context.Vendedor.Include(x => x.Departamento).FirstOrDefaultAsync(x => x.Id.Equals(id));
         }
 
         /// <summary>

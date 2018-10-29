@@ -23,9 +23,9 @@ namespace SalesWeb.Services
         /// Obtem todos os departamentos armazenados no BD
         /// </summary>
         /// <returns></returns>
-        public ICollection<Departamento> Consulta ()
+        public async Task<ICollection<Departamento>> ConsultaAsync ()
         {
-            return _context.Departamento.OrderBy(x => x.Nome).ToList();
+            return await _context.Departamento.OrderBy(x => x.Nome).ToListAsync();
         }
 
         /// <summary>
@@ -33,9 +33,9 @@ namespace SalesWeb.Services
         /// </summary>
         /// <param name="id">O departamento a ser procurado</param>
         /// <returns></returns>
-        public Departamento Consulta (int id)
+        public async Task<Departamento> ConsultaAsync (int id)
         {
-            return _context.Departamento.Find(id);
+            return await _context.Departamento.FindAsync(id);
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace SalesWeb.Services
         /// <returns></returns>
         public int Remove (int id)
         {
-            var departamento = Consulta(id);
+            var departamento = _context.Departamento.Find(id);
             _context.Departamento.Remove(departamento);
 
             return _context.SaveChanges();
