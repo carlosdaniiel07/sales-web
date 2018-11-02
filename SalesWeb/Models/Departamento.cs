@@ -11,6 +11,7 @@ namespace SalesWeb.Models
 
         [Required(ErrorMessage = "O campo {0} é obrigatório")]
         [StringLength(30, MinimumLength = 3, ErrorMessage = "O valor informado precisa estar entre {2} à {1} caracteres")]
+        [Display(Name = "Departamento")]
         public string Nome { get; set; }
 
         public ICollection<Vendedor> Vendedores { get; set; } = new List<Vendedor>();

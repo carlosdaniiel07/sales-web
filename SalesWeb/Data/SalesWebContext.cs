@@ -14,7 +14,7 @@ namespace SalesWeb.Data
             : base(options) { }
 
         public DbSet<Departamento> Departamento { get; set; }
-        public DbSet<Vendas> Venda { get; set; }
+        public DbSet<Venda> Venda { get; set; }
         public DbSet<Vendedor> Vendedor { get; set; }
     }
 }

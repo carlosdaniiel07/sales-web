@@ -28,7 +28,7 @@ namespace SalesWeb.Models
 
         public Departamento Departamento { get; set; }
         public int DepartamentoId { get; set; }
-        public ICollection<Vendas> Vendas { get; set; } = new List<Vendas>();
+        public ICollection<Venda> Vendas { get; set; } = new List<Venda>();
 
         public Vendedor() { }
 
@@ -42,12 +42,12 @@ namespace SalesWeb.Models
             Departamento = departamento;
         }
 
-        public void AddVenda (Vendas venda)
+        public void AddVenda (Venda venda)
         {
             Vendas.Add(venda);
         }
 
-        public void RemoveVenda (Vendas venda)
+        public void RemoveVenda (Venda venda)
         {
             Vendas.Remove(venda);
         }
