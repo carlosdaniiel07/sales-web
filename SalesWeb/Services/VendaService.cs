@@ -25,10 +25,57 @@ namespace SalesWeb.Services
         /// <returns></returns>
         public async Task<ICollection<Venda>> ConsultaAsync ()
         {
-            return await _context.Venda.
-                Include(obj => obj.Vendedor).
-                Include(obj => obj.Vendedor.Departamento).
-                OrderBy(obj => obj.Data).ToListAsync();
+            return await _context.Venda
+                .Include(obj => obj.Vendedor)
+                .Include(obj => obj.Vendedor.Departamento)
+                .OrderBy(obj => obj.Data).ToListAsync();
+        }
+
+
+        /// <summary>
+        /// Obtem todas as vendas armazenadas no BD de acordo com o período informado
+        /// </summary>
+        /// <param name="dataMinima">Data mínima</param>
+        /// <param name="dataLimite">Data limite</param>
+        /// <returns></returns>
+        public async Task<ICollection<Venda>> ConsultaAsync(DateTime dataMinima, DateTime dataLimite)
+        {
+            return await _context.Venda
+                .Include(obj => obj.Vendedor)
+                .Include(obj => obj.Vendedor.Departamento)
+                .OrderBy(obj => obj.Data)
+                .Where(x => x.Data >= dataMinima && x.Data <= dataLimite)
+                .OrderBy(x => x.Data).ToListAsync();
+        }
+
+        /// <summary>
+        /// Obtem todas as vendas armazenadas no BD de acordo com o vendedor informado
+        /// </summary>
+        /// <param name="vendedor">O vendedor</param>
+        /// <returns></returns>
+        public async Task<ICollection<Venda>> ConsultaAsync(Vendedor vendedor)
+        {
+            return await _context.Venda
+                .Include(obj => obj.Vendedor)
+                .Include(obj => obj.Vendedor.Departamento)
+                .OrderBy(obj => obj.Data)
+                .Where(x => x.Vendedor.Id.Equals(vendedor.Id))
+                .OrderBy(x => x.Data).ToListAsync();
+        }
+
+        /// <summary>
+        /// Obtem todas as vendas armazenadas no BD de acordo com o departamento
+        /// </summary>
+        /// <param name="departamento">O departamento</param>
+        /// <returns></returns>
+        public async Task<ICollection<Venda>> ConsultaAsync(Departamento departamento)
+        {
+            return await _context.Venda
+                .Include(obj => obj.Vendedor)
+                .Include(obj => obj.Vendedor.Departamento)
+                .OrderBy(obj => obj.Data)
+                .Where(x => x.Vendedor.Departamento.Equals(departamento.Id))
+                .OrderBy(x => x.Data).ToListAsync();
         }
 
         /// <summary>
@@ -37,7 +84,10 @@ namespace SalesWeb.Services
         /// <returns></returns>
         public async Task<Venda> ConsultaAsync(int id)
         {
-            return await _context.Venda.FindAsync(id);
+            return await _context.Venda
+                .Include(obj => obj.Vendedor)
+                .Include(obj => obj.Vendedor.Departamento)
+                .Where(x => x.Id.Equals(id)).FirstAsync();
         }
 
         /// <summary>
@@ -52,11 +102,11 @@ namespace SalesWeb.Services
         }
 
         /// <summary>
-        /// Atualiza o status de uma venda para "Pago"
+        /// Atualiza os dados de uma venda
         /// </summary>
-        /// <param name="venda">A venda a ser paga</param>
+        /// <param name="venda">A venda a ser atualizada</param>
         /// <returns></returns>
-        public int Pagar (Venda venda)
+        public int Atualizar (Venda venda)
         {
             if (_context.Venda.Any(x => x.Id.Equals(venda.Id)))
             {
@@ -68,7 +118,7 @@ namespace SalesWeb.Services
                 catch (DbUpdateConcurrencyException e) { throw new DbConcurrencyException(e.Message); }
             }
             else
-                throw new NotFoundException("Venda não encontrada!");
+                throw new NotFoundException("Venda não encontrada");
         }
     }
 }

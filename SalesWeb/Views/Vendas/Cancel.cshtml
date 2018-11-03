@@ -1,7 +1,7 @@
 ﻿@model SalesWeb.Models.Venda
 
 @{
-    ViewData["Title"] = "Atualizar venda";
+    ViewData["Title"] = "Cancelar venda";
 }
 
 <h2>@ViewData["Title"]</h2>
@@ -21,12 +21,10 @@
         <dd>@Html.DisplayFor(model => model.Status)</dd>
     </dl>
 
-    <p>Deseja realmente atualizar o status desta venda para <strong>Pago</strong>?</p>
+    <p>Deseja realmente <strong>cancelar </strong> esta venda?</p>
 
-    <form asp-action="Pay">
+    <form asp-action="Cancel">
         <input type="hidden" asp-for="Id" />
-        <div class="form-group">
-            <button type="submit" class="btn btn-primary">Confirmar&nbsp; <span class="glyphicon glyphicon-ok" aria-hidden="true"></span></button>
-        </div>
+        <button type="submit" class="btn btn-primary">Confirmar&nbsp; <span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
     </form>
 </div>

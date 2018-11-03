@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -47,10 +48,35 @@ namespace SalesWeb.Controllers
 
         }
 
-        public IActionResult Pay (int? id)
+        public async Task<IActionResult> Cancel (int? id)
         {
             if (id.HasValue)
-                return View();
+                return View(await _vendaService.ConsultaAsync(id.Value));
+            else
+                return RedirectToAction(nameof(Error), new { message = "Venda deve ser informada" });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel (int id)
+        {
+            try
+            {
+                // Recupera a venda através do Id
+                var venda = await _vendaService.ConsultaAsync(id);
+
+                venda.Status = StatusVenda.Cancelada;
+                _vendaService.Atualizar(venda);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (NotFoundException e) { return RedirectToAction(nameof(Error), new { message = e.Message }); }
+        }
+
+        public async Task<IActionResult> Pay (int? id)
+        {
+            if (id.HasValue)
+                return View(await _vendaService.ConsultaAsync(id.Value));
             else
                 return RedirectToAction(nameof(Error), new { message = "Venda deve ser informada" });
         }
@@ -65,10 +91,9 @@ namespace SalesWeb.Controllers
                 var venda = await _vendaService.ConsultaAsync(id);
 
                 venda.Status = StatusVenda.Paga;
-                _vendaService.Pagar(venda);
+                _vendaService.Atualizar(venda);
 
                 return RedirectToAction(nameof(Index));
-
             }
             catch (NotFoundException e) { return RedirectToAction(nameof(Error), new { message = e.Message }); }
         }

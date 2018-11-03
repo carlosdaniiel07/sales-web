@@ -1,0 +1,47 @@
+﻿@model IEnumerable<SalesWeb.Models.Venda>
+
+@{
+    ViewData["Title"] = "Relatório de vendas gerais";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="panel panel-primary">
+    <div class="panel-heading">Dados</div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-3">
+                <ul class="list-group">
+                    <li class="list-group-item">Total de vendas: <strong>@Model.Count()</strong></li>
+                    <li class="list-group-item">Vendas recebidas: <strong>@Model.Where(x => x.Status.Equals(StatusVenda.Paga)).Count()</strong></li>
+                    <li class="list-group-item">Valor vendido (R$): <strong>@Model.Where(x => x.Status.Equals(StatusVenda.Paga) || x.Status.Equals(StatusVenda.Pendente)).Sum(x => x.Valor)</strong></li>
+                    <li class="list-group-item">Valor recebido (R$): <strong>@Model.Where(x => x.Status.Equals(StatusVenda.Paga)).Sum(x => x.Valor)</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr class="bg-primary">
+                <th>@Html.DisplayNameFor(model => model.Data)</th>
+                <th>@Html.DisplayNameFor(model => model.Vendedor.Nome)</th>
+                <th>@Html.DisplayNameFor(model => model.Vendedor.Departamento.Nome)</th>
+                <th>@Html.DisplayNameFor(model => model.Valor)</th>
+                <th>@Html.DisplayNameFor(model => model.Status)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Data)</td>
+                <td>@Html.DisplayFor(modelItem => item.Vendedor.Nome)</td>
+                <td>@Html.DisplayFor(modelItem => item.Vendedor.Departamento.Nome)</td>
+                <td>@Html.DisplayFor(modelItem => item.Valor)</td>
+                <td>@Html.DisplayFor(modelItem => item.Status)</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
